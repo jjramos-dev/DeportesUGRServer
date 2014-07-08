@@ -40,6 +40,7 @@ import nice.comun.DatosEquipo;
 import nice.comun.Deporte;
 import nice.comun.Equipo;
 import nice.comun.Fase;
+import nice.comun.Global;
 import nice.comun.ListaPistasReservables;
 import nice.comun.ListaPistasReservablesFechas;
 import nice.comun.Noticia;
@@ -53,37 +54,51 @@ import org.restlet.Restlet;
 import org.restlet.data.Protocol;
 import org.restlet.routing.Router;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 /**
  *
  * @author jjramos
+ * 
  */
 public class NiceServer extends Application {
 
     private static HashMap<String, Categoria> baseDatosCategorias;
     private static Torneos torneos;
+    // Lista de pistas disponibles en las secciones de reservas en página del CSIRC.
     private static List<PistaReservable> listaPistasReservables;
+    // Credenciales para acceder a las pistas.
     private static String dni="X";
     private static String cadId="X";
+    // Puerto de escucha del servidor.
     private static int puerto=8080;
+    // Ruta del fichero de configuración por defecto
     private static String rutaFicheroDatosParaReserva = "./niceserver.cfg";
+    // Objeto que mantiene la la configuración del fichero .cfg
     private static ConfiguracionServidorNice configuracion;
 
+    
+    /**
+     * 
+     * @param string 
+     * @return Lista de pistas reservables que se pueden elegir
+     */
     private static List<PistaReservable> incializarBaseDeDatosPistasReservables(String string) {
         ListaPistasReservables pr = new ListaPistasReservables(string);
 
+        // Ejecuta la búsqueda de información en la web de las páginas de reserva, y obtiene la lista
+        // de pistas definidas en la web:
         pr.consultarWeb();
         List<PistaReservable> lista = pr.getListaPistasReservables();
 
         return lista;
     }
 
+    /**
+     * Método principal del servidor.
+     * @param args El primer argumento puede ser la ruta del fichero de configuración.
+     */
     public static void main(String[] args) {
         try {
+            
             // Miramos si hay fichero de configuración:
             if (args.length >= 1) {
                 rutaFicheroDatosParaReserva = args[0];
@@ -97,7 +112,7 @@ public class NiceServer extends Application {
             Component componente = new Component();
             componente.getServers().add(Protocol.HTTP, puerto);
 
-            // Para HTTPS:
+            // Para HTTPS, mirar en:
             // http://restlet.com/learn/guide/2.2/core/security/https
             
             // Creamos una aplicación. ¿Se pueden crear varias aplicaciones para un componente? Sería lo suyo...
@@ -107,36 +122,49 @@ public class NiceServer extends Application {
             componente.getDefaultHost().attachDefault(aplicacion);
             componente.start();
 
+            
         } catch (Exception ex) {
             Logger.getLogger(NiceServer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
+    /**
+     * Método para inicializar todas listas con la información extraída de las webs.
+     * Así genera el "nido".
+     * @return Devuelve 0 si no hubo ningún error, u otro valor en caso contrario.
+     */
     private static int inicializarBaseDeDatos() {
         int error = 0;
 
-            ////////////////////////////////////
-        //Datos de prueba. Los lee de un fichero.
+        // Se crea la configuración a partir del fichero de configuración:
         configuracion = new ConfiguracionServidorNice(rutaFicheroDatosParaReserva);
 
+        // Si no hubo erro al interpretar el fichero
         if (configuracion.getError() == 0) {
+            // Se obtienen las credenciales, necesarias para las consultas de reservas
             dni = configuracion.getId();
             cadId = configuracion.getCadId();
+            // Se lee el puerto desde el que servir las consultas
             puerto=configuracion.getPuerto();
             
-            ///////////////////////////////////
-            listaPistasReservables = incializarBaseDeDatosPistasReservables("http://oficinavirtual.ugr.es/CarneUniversitario/TarjetasDeportes.jsp?textoXML=<xml><numero_PIU></numero_PIU><solicitud><dni>" + dni + "</dni><nia></nia><tarjeta_deportiva>1</tarjeta_deportiva><pago_viable>0</pago_viable><saldo_monedero>0</saldo_monedero></solicitud></xml>#");
 
-           torneos = new Torneos("http://cad.ugr.es/static/CADManagement");
+            // Se extrae la información de reservas
+            listaPistasReservables = incializarBaseDeDatosPistasReservables(Global.getBaseUrlListaPistasReservables(dni,cadId));
 
-            // Comprobamos si tenemos nuestra base de datos:
+           torneos = new Torneos(Global.baseUrlTorneos);
+
+            // Comprobamos si tenemos una copia del nido (base de datos de memoria):
             File db = new File("torneos.serial");
 
+            // Siempre entra aquí: no lee el finchero por ahora.
             if (true || !db.exists()) {
                 FileOutputStream fout = null;
                 try {
 
+                    // Se extrae la información de qué torneos se han definido en la web del CAD:
                     torneos.consultarWeb();
+                    
+                    // Hacemos una copia de la base de datos:
                     fout = new FileOutputStream("torneos.serial");
                     ObjectOutputStream oos = new ObjectOutputStream(fout);
                     oos.writeObject(torneos);
@@ -147,12 +175,14 @@ public class NiceServer extends Application {
                     Logger.getLogger(NiceServer.class.getName()).log(Level.SEVERE, null, ex);
                 } finally {
                     try {
+                        // Si no hubo problemas al escribir, se cierra el fichero
                         fout.close();
                     } catch (IOException ex) {
                         Logger.getLogger(NiceServer.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                }
+                }                
             } else {
+                // Si existiera una copia de la base de datos, se lee:
                 FileInputStream fin = null;
                 try {
                     // Si existe, lo leemos de fichero:
@@ -160,6 +190,7 @@ public class NiceServer extends Application {
                     fin = new FileInputStream("torneos.serial");
                     ObjectInputStream oos = new ObjectInputStream(fin);
                     torneos = (Torneos) oos.readObject();
+                    
                 } catch (FileNotFoundException ex) {
                     Logger.getLogger(NiceServer.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (IOException ex) {
@@ -176,14 +207,9 @@ public class NiceServer extends Application {
 
             }
 
-            Categoria categoria;
+            // Creamos una base de datos de categorías:
             baseDatosCategorias = new HashMap<String, Categoria>();
 
-        // Copia lo siguiente por cada enlace de: 
-//        categoria = new Categoria("http://cad.ugr.es/static/CADManagement/*/trofeo-rector-1a-division-2013");      
-//        categoria.consultarWeb();
-//        baseDatosCategorias.put(categoria.getTitulo(), categoria);
-//        
         } else {
             error = 1;
             System.err.println("Error al leer la configuración...");
@@ -192,72 +218,111 @@ public class NiceServer extends Application {
         return error;
     }
 
-    // Hace falta añadir estos ¿"filtros"? a la aplicación: 
+    /**
+     * Inicializa los recursos accesibles con el RESTlet: 
+     * @return 
+     */
     public Restlet createInboundRoot() {
-        // Creamos una encamidor:
+        
+        // Creamos una encamidor de Restlet que recogerá las peticiones:
         Router encaminador = new Router(getContext());
 
         // enlaza cada recurso al encaminador:
-        //encaminador.attach("/categorias/{categoria}", RecursoCategoria.class);
+        // Servicios de deportes existentes:
         encaminador.attach("/perfiles/deportes", RecursoPerfilesDeportes.class);
+        // Servicios para listar equipos definidos en todas las competiciones
         encaminador.attach("/perfiles/equipos", RecursoPerfilesEquipos.class);
+        // Servicio para obtener una noticia concreta
         encaminador.attach("/noticias/{noticiaid}/tablones/{tablon}", RecursoNoticia.class);
+        // Servicio para obtener la lista de deportes por categoría (torneo)
         encaminador.attach("/categorias/{categoria}/deportes", RecursoDeportes.class);
+        // Servicio para obtener los calendarios de partidos por torneo y deporte
         encaminador.attach("/categorias/{categoria}/deportes/{deporte}/calendarios", RecursoCalendarios.class);
+        // Servicio para obtener los torneos de un año determinado
         encaminador.attach("/torneos/{anio}", RecursoCategorias.class);
+        // Servicio para obtener información de una pista determinada
         encaminador.attach("/pista/{pistaid}", RecursoPista.class);
+        // Servicio para obtener la lista de pistas reservables
         encaminador.attach("/reservas/pistas", RecursoPistasReservas.class);
+        // Servicio para obtener la parrilla de reservas de una pista y una fecha
         encaminador.attach("/reservas/pistas/{codigoPista}/fecha/{fecha}", RecursoPistasReservasFechas.class);
+        // Servicio para consultar los equipos definidos para un torneo y un deporte
         encaminador.attach("/categorias/{categoria}/deportes/{deporte}/equipos", RecursoEquiposCategoriaDeporte.class);
-        // encaminador.attach("/categorias/{categoria}/deportes", RecursoDeportes.class);
-
-        // encaminador.attach("/pista/{pistaid}/precio", RecursoPrecio.class);
-        // router.attach("/users/{user}/orders/{order}", OrderResource.class);
+ 
+        
         // Devuelve la raíz del encaminador
         return encaminador;
     }
 
+    /**
+     * Método para obtener la lista de deportes definidos para un código de torneo.
+     * @param categoriaId Código del torneo
+     * @return Devuelve la lista de deportes definidos para el torneo <code>categoriaId</code>
+     */
     List<Deporte> getDeportes(String categoriaId) {
         List<Deporte> listaDeportes = null;
 
-        //Categoria categoria=baseDatosCategorias.get(categoriaId);
+        // Se busca el torneo de la lista de torneos con el identificador "categoriaId"
         Categoria categoria = torneos.getCategoria(categoriaId);
 
-        listaDeportes = categoria.getListaDeportes();
+        if(listaDeportes!=null)
+            listaDeportes = categoria.getListaDeportes();
 
         return listaDeportes;
     }
 
+    /**
+     * Método para obtener las fases definidas en un torneo, dado su código <code>categoriaId</code>
+     * y seleccionado el deporte con el código <code>deporteId</code>.
+     * @param categoriaId Identificador del torneo
+     * @param deporteId identificador del deporte
+     * @return lista de fases definidas para el torneo y el deporte. Devuelve una lista vacía si no hay fases, 
+     *          <code>null</code> si hubo problemas en la extracción de la información.
+     */
     List<Fase> getFases(String categoriaId, String deporteId) {
         List<Fase> fases = null;
 
         //  Categoria categoria=baseDatosCategorias.get(categoriaId);
         Categoria categoria = torneos.getCategoria(categoriaId);
 
-        fases = categoria.getFases(deporteId);
+        if(categoria!=null) 
+            fases = categoria.getFases(deporteId);
 
         return fases;
     }
 
+    /**
+     * Método para consultar la lista de torneos definidos para el año <code>anio</code>.
+     * @param anio Año de los torneos a consultar, con formato: "AAAA" 
+     * @return Devuelve la lista de los torneos del año seleccionado. Si no hay ninguno, devueve <code>null</code>
+     */
     List<Categoria> getCategorias(String anio) {
         List<Categoria> categorias = null;
 
         List<Categoria> categorias_ = torneos.getListaCategorias();
-
-        for (Categoria categoria_ : categorias_) {
-            if (anio.compareTo(categoria_.getAnio()) == 0) {
-                categorias.add(categoria_);
+        
+        if (categorias_ != null) {
+            for (Categoria categoria_ : categorias_) {
+                if (anio.compareTo(categoria_.getAnio()) == 0) {
+                    categorias.add(categoria_);
+                }
             }
-        }
 
-        // Si no hay ninguno, es que no hay nada de ese año:
-        if (categorias.isEmpty()) {
-            categorias = null;
+            // Si no hay ninguno, es que no hay nada de ese año:
+            if (categorias.isEmpty()) {
+                categorias = null;
+            }
         }
 
         return categorias;
     }
-
+    
+    /**
+     * 
+     * 
+     * @param anio
+     * @return 
+     */
     List<DatosCategoria> getListaCategorias(String anio) {
         List<DatosCategoria> categorias = new ArrayList<DatosCategoria>();
 

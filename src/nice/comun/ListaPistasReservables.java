@@ -16,11 +16,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package nice.comun;
 
@@ -35,37 +30,61 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 /**
+ * Clase que encapsula la lista de pistas reservables de la web de reservas.
  *
  * @author jjramos
  */
 public class ListaPistasReservables {
-     private String baseURL;
+
+// URL de la web de reservas.
+    private String baseURL;
     private List<PistaReservable> listaPistasReservables;
 
-    public ListaPistasReservables(String string) {
-        this.baseURL=string;     
-        listaPistasReservables=null;
+    /**
+     * Constructor con URL de la página con la información de reservas.
+     *
+     * @param baseURL URL base de la web de las reservas.
+     */
+    public ListaPistasReservables(String baseURL) {
+        this.baseURL = baseURL;
+        listaPistasReservables = null;
     }
 
+    /**
+     * Obtiene la lista de pistas reservables.
+     *
+     * @return Lista de pistas reservables, o <code>null</code> si no se pudo
+     * inicializar o falló al acceder a la web de reservas.
+     */
     public List<PistaReservable> getListaPistasReservables() {
-        
         return listaPistasReservables;
     }
-    
-      public void consultarWeb(){
-       
+
+    /**
+     * Lanza la petición para extraer la información de la web de reservas.
+     *
+     */
+    public void consultarWeb() {
+
         try {
+            // Se conecta a la web de reservas, e interpreta su código HTML.
             Document doc = Jsoup.connect(baseURL).get();
-            
-            
-             Elements pistas_=doc.select(".selectPIU > option");
-             
+
+            // Busca todos los elementos de la clase .selectPIU que esté seguido 
+            // de un elemento del tipo "option":
+            Elements pistas_ = doc.select(".selectPIU > option");
+
+            // Si se encuentra alguno de estos elementos:
             if (!pistas_.isEmpty()) {
+
                 listaPistasReservables = new ArrayList<PistaReservable>();
+                // Por cada pista definida, se obtiene su texto y el código de la pista
                 for (Element pista_ : pistas_) {
                     String pista = pista_.text();
                     String codigoPista = pista_.attr("value");
 
+                    // Se crea un objeto de la clase "Pista", con su código y el nombre
+                    // y se añade a la lista de pistas:
                     PistaReservable pr = new PistaReservable(codigoPista, pista);
                     listaPistasReservables.add(pr);
                 }
@@ -74,7 +93,5 @@ public class ListaPistasReservables {
         } catch (IOException ex) {
             Logger.getLogger(Reservas.class.getName()).log(Level.SEVERE, null, ex);
         }
-      
-    } 
-
+    }
 }
