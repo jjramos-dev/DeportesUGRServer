@@ -349,26 +349,47 @@ public class NiceServer extends Application {
 
     }
 
+    /**
+     * Devuelve la lista de pistas cuya reserva puede consultarse.
+     * @return Devuelve la lista de pistas existentes, o <code>null</code> si hubo problemas de conexión.
+     */
     List<PistaReservable> getListaPistasReservables() {
         return listaPistasReservables;
     }
-
+    
+    /**
+     * Devuelve una cadena de caracteres con la tabla de reservas en formato HTML para la pista con el código
+     * <code>codigoPista</code>, nombre <code>nombrePista</code> y fecha <code>fecha</code>. 
+     * @param codigoPista Código definido por la aplicación de reservas del CSIRC.
+     * @param nombrePista Nombre de la pista, según define la aplicación de reservas del CSIRC.
+     * @param fecha String con la fecha del día de consulta, con el formato: "dd-mm-aaaa".
+     * @return 
+     */
     String getTablaReservas(String codigoPista, String nombrePista, String fecha) {
         String tablaReservas = "";
 
+        // Crea una objeto de la clase de listas reservables.
         ListaPistasReservablesFechas lprf = new ListaPistasReservablesFechas("");
 
+        // Se extrae la información de la web:
         tablaReservas = lprf.consultarFecha(dni, cadId, nombrePista, codigoPista, fecha);
 
         return tablaReservas;
     }
 
+    /**
+     * Devuelve la lista de deportes definidos en la web del CAD.
+     * @return Lista de deportes, <code>null</code> en caso de problemas de conexión.
+     */
     List<String> getDeportes() {
         List<Deporte> listaDeportes = null;
         List<String> listaCadenaDeportes = null;
+        
+        // Memoria asociativa para identificar las listas de deportes, independientemente
+        // del torneo en el que fueron definidos:
         HashMap<String, Deporte> mapaDeportes = new HashMap<String, Deporte>();
 
-        //Categoria categoria=baseDatosCategorias.get(categoriaId);
+        // Se obtiene la lista de deportes a partir de la base de datos de categorías.
         List<Categoria> listaCategorias = torneos.getListaCategorias();
 
         // Por cada categoría, obtenemos los deportes definidos:
@@ -393,6 +414,10 @@ public class NiceServer extends Application {
         return listaCadenaDeportes;
     }
 
+    /**
+     * Devuelve la lista de equipos y sus datos.
+     * @return Devuelve la lista de equipos, <code>null</code> en caso de problemas de conexión.
+     */
     List<DatosEquipo> getDatosEquipos() {
         List<DatosEquipo> listaEquipos = null;
         Map<String, DatosEquipo> mapaEquipos = new HashMap();
@@ -417,6 +442,7 @@ public class NiceServer extends Application {
                             Equipo equipo1 = partido.getEquipo1();
                             Equipo equipo2 = partido.getEquipo2();
 
+                            // El mapa de equipos se construye añadiendo título, categoría y deporte.
                             DatosEquipo datosEquipo = new DatosEquipo(equipo1, tituloCategoria, tituloDeporte);
                             mapaEquipos.put(datosEquipo.getTituloCategoria() + ">" + datosEquipo.getTituloDeporte() + ">" + equipo1.getNombre(), datosEquipo);
 
@@ -429,6 +455,7 @@ public class NiceServer extends Application {
             }
         }
 
+        // Si hay equipos, se crean una lista de deportes y se ordena:
         if (!mapaEquipos.isEmpty()) {
             listaEquipos = new ArrayList<DatosEquipo>();
 
@@ -452,6 +479,12 @@ public class NiceServer extends Application {
         return listaEquipos;
     }
 
+    /**
+     * Devuelve una noticia, dado un tablón y un identificador de noticia.
+     * @param tablon String que identifica el tipo de tablón Uniweb.
+     * @param noticiaid String que identifica a la noticia: su URL dentro de 
+     * @return 
+     */
     Noticia getNoticia(String tablon,String noticiaid) {
       Noticia noticia=new Noticia(tablon,noticiaid);  
       noticia=noticia.consultaWeb();
