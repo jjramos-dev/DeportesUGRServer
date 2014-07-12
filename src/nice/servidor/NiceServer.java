@@ -316,7 +316,7 @@ public class NiceServer extends Application {
         // Se busca el torneo de la lista de torneos con el identificador "categoriaId"
         Categoria categoria = torneos.getCategoria(categoriaId);
 
-        if(listaDeportes!=null)
+        if(categoria!=null)
             listaDeportes = categoria.getListaDeportes();
 
         return listaDeportes;
