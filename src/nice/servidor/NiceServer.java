@@ -36,6 +36,7 @@ import java.util.logging.Logger;
 import nice.comun.Categoria;
 import nice.comun.Clasificaciones;
 import nice.comun.DatosCategoria;
+import nice.comun.DatosContacto;
 import nice.comun.DatosEquipo;
 import nice.comun.Deporte;
 import nice.comun.Equipo;
@@ -48,6 +49,7 @@ import nice.comun.Partido;
 import nice.comun.PistaReservable;
 import nice.comun.Ronda;
 import nice.comun.Torneos;
+import nice.nido.AraniaDatosContacto;
 import org.restlet.Application;
 import org.restlet.Component;
 import org.restlet.Restlet;
@@ -65,6 +67,8 @@ public class NiceServer extends Application {
     private static Torneos torneos;
     // Lista de pistas disponibles en las secciones de reservas en página del CSIRC.
     private static List<PistaReservable> listaPistasReservables;
+    // Información de  contacto de los campus con instalaciones deportivas
+    private static List<DatosContacto> listaContactos;
     // Credenciales para acceder a las pistas.
     private static String dni="X";
     private static String cadId="X";
@@ -76,7 +80,7 @@ public class NiceServer extends Application {
     private static ConfiguracionServidorNice configuracion;
     private static HebraPlanificacion hp;
 
-    private static boolean debug_extraer_info_torneos=true;
+    private static boolean debug_extraer_info_torneos=false;
     
     /**
      * 
@@ -141,6 +145,8 @@ public class NiceServer extends Application {
         int error = 0;
         List<PistaReservable> listaPistasReservables_ =null;
         Torneos torneos_ =null;
+        List<DatosContacto> listaContactos_=null;
+        
         
         // Se crea la configuración a partir del fichero de configuración:
         configuracion = new ConfiguracionServidorNice(rutaFicheroDatosParaReserva);
@@ -157,9 +163,12 @@ public class NiceServer extends Application {
             // Se extrae la información de reservas
             listaPistasReservables_ = incializarBaseDeDatosPistasReservables(Global.getBaseUrlListaPistasReservables(dni,cadId));
 
-            torneos_ = new Torneos(Global.baseUrlTorneos);
-
+    
+            // Extraemos la información de contacto:
+            listaContactos_ =inicializarBaseDeDatosContactos();
+            
             // Comprobamos si tenemos una copia del nido (base de datos de memoria):
+            torneos_ = new Torneos(Global.baseUrlTorneos);
             File db = new File("torneos.serial");
 
             // Siempre entra aquí: no lee el finchero por ahora.
@@ -229,6 +238,11 @@ public class NiceServer extends Application {
                 listaPistasReservables=listaPistasReservables_;
             }
             
+            
+            if(listaContactos_!=null){
+                listaContactos=listaContactos_;
+            }
+            
         } else {
             error = 1;
             System.err.println("Error al leer la configuración...");
@@ -237,11 +251,36 @@ public class NiceServer extends Application {
         return error;
     }
 
+    /**
+     * Obtiene los datos de contacto de la página del CAD.
+     * @return Lista de datos de contacto de los campus del CAD.
+     */
+    private static List<DatosContacto> inicializarBaseDeDatosContactos() {
+        List<DatosContacto> listaContactos_=null;
+        
+        // Se crea una araña para obtener los contactos, y se lanza:
+        AraniaDatosContacto adc=new AraniaDatosContacto();
+        listaContactos_=adc.explorar();
+        
+        return listaContactos_;
+    }
+
+        /**
+     * Consulta la lista de contactos (por campus) del servicio CAD:
+     * @return Lista de contactos en formato <code>List &lt;DatosContacto&gt;</code>.
+     */
+    List<DatosContacto> getListaContactos() {
+        
+        return listaContactos;
+    }
+
+    
     private static void planificarRefrescoBaseDeDatos(long period) {
      
         HebraPlanificacion hebraPlanificacion = new HebraPlanificacion(period);
         hebraPlanificacion.start();
     }
+
 
     static public class HebraPlanificacion extends Thread{
         long period=0;
@@ -299,7 +338,9 @@ public class NiceServer extends Application {
         encaminador.attach("/reservas/pistas/{codigoPista}/fecha/{fecha}", RecursoPistasReservasFechas.class);
         // Servicio para consultar los equipos definidos para un torneo y un deporte
         encaminador.attach("/categorias/{categoria}/deportes/{deporte}/equipos", RecursoEquiposCategoriaDeporte.class);
- 
+        // Servicio para consultar información de contacto del CAD:
+        encaminador.attach("/contactos", RecursoContactos.class);
+        
         
         // Devuelve la raíz del encaminador
         return encaminador;

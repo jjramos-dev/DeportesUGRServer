@@ -25,47 +25,42 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import nice.comun.DatosCategoria;
+import nice.comun.DatosContacto;
 import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;
 
 /**
  *
- * @author aulas
+ * @author jjramos
  */
-public class RecursoCategorias extends ServerResource{
+public class RecursoContactos extends ServerResource {
+
     private ObjectMapper mapper;
     private NiceServer servicioRestTorneos;
-    private String anio;
-    List<DatosCategoria> categorias;
-    
-      public void doInit() {
-        System.out.println("Hola!");
-          mapper=new ObjectMapper(); 
-      // Para que no falle aunque no tenga un constructtor vacío, ni getter y setters públicos:
-      mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        servicioRestTorneos=(NiceServer) getApplication();
-        
-        // Parámetro obtenido de la URL
-        this.anio = getAttribute("anio");
-        
-        //categorias=servicioRestTorneos.getCategorias(anio);
-categorias=servicioRestTorneos.getListaCategorias(anio);
+    List<DatosContacto> contactos;
 
-      }
+    public void doInit() {
 
-          @Get("json")
-    public String devolver() {
-            String serializado=null;
-        
-        try {
-          
-            serializado=mapper.writeValueAsString(categorias);
-    
-          } catch (JsonProcessingException ex) {
-            Logger.getLogger(RecursoCategorias.class.getName()).log(Level.SEVERE, null, ex);
-        }
-          return serializado;
-        
+        mapper = new ObjectMapper();
+        // Para que no falle aunque no tenga un constructtor vacío, ni getter y setters públicos:
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        servicioRestTorneos = (NiceServer) getApplication();
+
+        contactos = servicioRestTorneos.getListaContactos();
+
     }
 
+    @Get("json")
+    public String devolver() {
+        String serializado = null;
+
+        try {
+            serializado = mapper.writeValueAsString(contactos);
+        } catch (JsonProcessingException ex) {
+            Logger.getLogger(RecursoContactos.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return serializado;
+
+    }
 }

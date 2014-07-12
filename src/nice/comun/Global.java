@@ -27,6 +27,7 @@ public class Global {
 
     public static final String baseUrlListaPistasReservables="http://oficinavirtual.ugr.es/CarneUniversitario/TarjetasDeportes.jsp?textoXML=<xml><numero_PIU></numero_PIU><solicitud><dni>janderclander</dni><nia></nia><tarjeta_deportiva>1</tarjeta_deportiva><pago_viable>0</pago_viable><saldo_monedero>0</saldo_monedero></solicitud></xml>#";
     public static final String baseUrlTorneos="http://cad.ugr.es/static/CADManagement";
+    public static String baseUrlDatosContacto="http://cad.ugr.es/pages/administracion";
     
     /**
      * Devuelve la URL para acceder a la página de listado de pistas, 
