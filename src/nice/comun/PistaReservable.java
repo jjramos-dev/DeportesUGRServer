@@ -29,18 +29,30 @@ package nice.comun;
  */
 public class PistaReservable {
 
-    private String codigo=null;
-    private String titulo=null;
+    private String codigo = null;
+    private String titulo = null;
 
+    /**
+     * 
+     */
     PistaReservable() {
-   
+
     }
 
+    /**
+     * 
+     * @param codigoPista
+     * @param pista 
+     */
     PistaReservable(String codigoPista, String pista) {
         this.codigo = codigoPista;
         this.titulo = pista;
     }
 
+    /**
+     * 
+     * @return 
+     */
     public String getCodigo() {
         return codigo;
     }
@@ -49,12 +61,20 @@ public class PistaReservable {
         return titulo;
     }
 
+    /**
+     * 
+     * @param codigo 
+     */
     public void setCodigo(String codigo) {
         this.codigo = codigo;
     }
 
+    /**
+     * 
+     * @param titulo 
+     */
     public void setTitulo(String titulo) {
         this.titulo = titulo;
     }
-    
+
 }

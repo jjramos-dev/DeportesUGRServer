@@ -34,6 +34,10 @@ import java.util.logging.Logger;
  */
 class ConfiguracionServidorNice {
 
+    // Periodo por defecto entre actualizaciones de la base de datos, en minutos.
+    // Por defecto, 6 horas.
+    public final static long UPDATE_PERIOD=6*60;
+    
     int error=-1;
     String rutaFichero;
     private Map<String,String> valores;
@@ -113,6 +117,26 @@ class ConfiguracionServidorNice {
         }
         
         return puerto;
+    }
+
+    /**
+     * Devuelve el tiempo entre actualizaciones de la base de datos. Si no se especifica
+     * en el fichero de configuración, se asume <code>UPDATE_PERIOD</code> minutos.
+     * @return Periodo en segundos.
+     */
+    long getPeriodoActualizacion() {
+        long periodEnMinutos=UPDATE_PERIOD;
+        String periodEnMinutos_=valores.get("refresco");
+        
+        if(periodEnMinutos_!=null){
+            try {
+               periodEnMinutos=Integer.parseInt(valores.get("refresco").trim());
+             } catch (NumberFormatException ex){
+                periodEnMinutos=UPDATE_PERIOD;
+            }
+        }
+        
+        return periodEnMinutos;
     }
     
     

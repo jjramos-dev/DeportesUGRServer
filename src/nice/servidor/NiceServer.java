@@ -61,7 +61,7 @@ import org.restlet.routing.Router;
  */
 public class NiceServer extends Application {
 
-    private static HashMap<String, Categoria> baseDatosCategorias;
+    private static HashMap<String, Categoria> baseDatosCategorias=null;
     private static Torneos torneos;
     // Lista de pistas disponibles en las secciones de reservas en página del CSIRC.
     private static List<PistaReservable> listaPistasReservables;
@@ -74,6 +74,7 @@ public class NiceServer extends Application {
     private static String rutaFicheroDatosParaReserva = "./niceserver.cfg";
     // Objeto que mantiene la la configuración del fichero .cfg
     private static ConfiguracionServidorNice configuracion;
+    private static HebraPlanificacion hp;
 
     
     /**
@@ -108,6 +109,8 @@ public class NiceServer extends Application {
             // Esto debería ser una base de datos...
             inicializarBaseDeDatos();
 
+            planificarRefrescoBaseDeDatos(configuracion.getPeriodoActualizacion());
+            
             // Creamos un componente de restlet, que escuchará mediante HTTP en 8080:
             Component componente = new Component();
             componente.getServers().add(Protocol.HTTP, puerto);
@@ -135,7 +138,9 @@ public class NiceServer extends Application {
      */
     private static int inicializarBaseDeDatos() {
         int error = 0;
-
+        List<PistaReservable> listaPistasReservables_ =null;
+        Torneos torneos_ =null;
+        
         // Se crea la configuración a partir del fichero de configuración:
         configuracion = new ConfiguracionServidorNice(rutaFicheroDatosParaReserva);
 
@@ -149,9 +154,9 @@ public class NiceServer extends Application {
             
 
             // Se extrae la información de reservas
-            listaPistasReservables = incializarBaseDeDatosPistasReservables(Global.getBaseUrlListaPistasReservables(dni,cadId));
+            listaPistasReservables_ = incializarBaseDeDatosPistasReservables(Global.getBaseUrlListaPistasReservables(dni,cadId));
 
-           torneos = new Torneos(Global.baseUrlTorneos);
+            torneos_ = new Torneos(Global.baseUrlTorneos);
 
             // Comprobamos si tenemos una copia del nido (base de datos de memoria):
             File db = new File("torneos.serial");
@@ -162,12 +167,12 @@ public class NiceServer extends Application {
                 try {
 
                     // Se extrae la información de qué torneos se han definido en la web del CAD:
-                    torneos.consultarWeb();
+                    torneos_.consultarWeb();
                     
                     // Hacemos una copia de la base de datos:
                     fout = new FileOutputStream("torneos.serial");
                     ObjectOutputStream oos = new ObjectOutputStream(fout);
-                    oos.writeObject(torneos);
+                    oos.writeObject(torneos_);
 
                 } catch (FileNotFoundException ex) {
                     Logger.getLogger(NiceServer.class.getName()).log(Level.SEVERE, null, ex);
@@ -189,7 +194,7 @@ public class NiceServer extends Application {
                     System.out.println("Leyendo base de datos:");
                     fin = new FileInputStream("torneos.serial");
                     ObjectInputStream oos = new ObjectInputStream(fin);
-                    torneos = (Torneos) oos.readObject();
+                    torneos_ = (Torneos) oos.readObject();
                     
                 } catch (FileNotFoundException ex) {
                     Logger.getLogger(NiceServer.class.getName()).log(Level.SEVERE, null, ex);
@@ -205,11 +210,21 @@ public class NiceServer extends Application {
                     }
                 }
 
-            }
+            } 
 
             // Creamos una base de datos de categorías:
-            baseDatosCategorias = new HashMap<String, Categoria>();
-
+            if(baseDatosCategorias==null){
+                baseDatosCategorias = new HashMap<String, Categoria>();
+            }
+              
+            // Actualizamos las bases de datos actuales:
+            if(torneos_!=null){
+                torneos=torneos_;
+            }
+            if(listaPistasReservables_!=null){
+                listaPistasReservables=listaPistasReservables_;
+            }
+            
         } else {
             error = 1;
             System.err.println("Error al leer la configuración...");
@@ -218,6 +233,38 @@ public class NiceServer extends Application {
         return error;
     }
 
+    private static void planificarRefrescoBaseDeDatos(long period) {
+     
+        HebraPlanificacion hebraPlanificacion = new HebraPlanificacion(period);
+        hebraPlanificacion.start();
+    }
+
+    static public class HebraPlanificacion extends Thread{
+        long period=0;
+        
+        public HebraPlanificacion(long periodoEnMinutos) {
+            this.period=periodoEnMinutos;
+        }
+
+        @Override
+        public void run() {
+            super.run(); //To change body of generated methods, choose Tools | Templates.
+            
+            do {                
+                try {
+                    
+                    // Periodo se pasa a milisegundos
+                    Thread.sleep(period*60*1000);
+                    inicializarBaseDeDatos();
+
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(NiceServer.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } while(true);
+            
+        }
+    }
+    
     /**
      * Inicializa los recursos accesibles con el RESTlet: 
      * @return 
@@ -560,78 +607,4 @@ public class NiceServer extends Application {
 
         return listaEquipos;
     }
-    
-    
-//        List<DatosEquipo> getEquipos(String categoriaId, String deporteId) {
-//        
-//        List<DatosEquipo> listaEquipos=null;
-//        String tituloDeporte="deporteId";
-//        Map<String, DatosEquipo> mapaEquipos = new HashMap();
-//
-//        Categoria categoria = torneos.getCategoria(categoriaId);
-//        String tituloCategoria = categoria.getTitulo();
-//        
-//        // Buscamos la información del deporte:
-//        
-//        List<Deporte> listaDeportes = categoria.getListaDeportes();
-//        Deporte deporte=null;
-//        for(int i=0;deporte==null&&i<listaDeportes.size();i++){
-//            Deporte deporte_=listaDeportes.get(i);
-//            
-//            if(deporte_.getId().compareTo(deporteId)==0){
-//                deporte=deporte_;
-//            }
-//        }    
-//        if(deporte!=null){
-//            tituloDeporte=deporte.getTitulo();
-//        }
-//        
-//        
-//        List<Fase> listaclasificaciones = categoria.getFases(deporteId);
-//
-//                for (Fase fase : listaclasificaciones) {
-//                    List<Ronda> listaRondas = fase.getRondas();
-//
-//                    for (Ronda ronda : listaRondas) {
-//                        List<Partido> listaPartidos = ronda.getPartidos();
-//
-//                        for (Partido partido : listaPartidos) {
-//                            Equipo equipo1 = partido.getEquipo1();
-//                            Equipo equipo2 = partido.getEquipo2();
-//
-//                            DatosEquipo datosEquipo = new DatosEquipo(equipo1, tituloCategoria, tituloDeporte);
-//                            mapaEquipos.put(datosEquipo.getTituloCategoria() + ">" + datosEquipo.getTituloDeporte() + ">" + equipo1.getNombre(), datosEquipo);
-//
-//                            datosEquipo = new DatosEquipo(equipo2, tituloCategoria, tituloDeporte);
-//                            mapaEquipos.put(datosEquipo.getTituloCategoria() + ">" + datosEquipo.getTituloDeporte() + ">" + equipo2.getNombre(), datosEquipo);
-//
-//                        }
-//                    }
-//                }
-//            
-//        
-//
-//        if (!mapaEquipos.isEmpty()) {
-//            listaEquipos = new ArrayList<DatosEquipo>();
-//
-//            for (DatosEquipo datosEquipo : mapaEquipos.values()) {
-//                listaEquipos.add(datosEquipo);
-//            }
-//
-//            // Ordenamos la lista...
-//            Collections.sort(listaEquipos, new Comparator<DatosEquipo>() {
-//
-//                @Override
-//                public int compare(DatosEquipo t, DatosEquipo t1) {
-//                    String s = t.getTituloCategoria() + ">" + t.getTituloDeporte() + ">" + t.getEquipo().getNombre();
-//                    String s1 = t.getTituloCategoria() + ">" + t.getTituloDeporte() + ">" + t.getEquipo().getNombre();
-//
-//                    return s1.compareTo(s);
-//                }
-//            });
-//        }
-//
-//        return listaEquipos;
-//    }
-
 }
