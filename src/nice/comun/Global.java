@@ -37,7 +37,7 @@ public class Global {
      */
     public static String getBaseUrlListaPistasReservables(String dni, String cadId) {
         String url=baseUrlListaPistasReservables;
-        url.replaceAll("janderclander", dni);
+        url=url.replaceAll("janderclander", dni);
         return url;
     }
     

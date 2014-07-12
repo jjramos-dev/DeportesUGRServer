@@ -21,6 +21,9 @@ package nice.comun;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,6 +39,14 @@ import org.jsoup.select.Elements;
  */
 public class ListaPistasReservables {
 
+    // Constantes:
+    public static final String STRING_CAM_CARTUJA="C. CARTUJA";
+    public static final String STRING_CAM_CARTUJA_ABREV=" CAR";
+    public static final String STRING_CAM_FUENTENUEVA="C. FUENTENUEVA";
+    public static final String STRING_CAM_FUENTENUEVA_ABREV=" FUE";
+    
+    
+    
 // URL de la web de reservas.
     private String baseURL;
     private List<PistaReservable> listaPistasReservables;
@@ -83,15 +94,65 @@ public class ListaPistasReservables {
                     String pista = pista_.text();
                     String codigoPista = pista_.attr("value");
 
+                    // Se le da un formato más adecuado al nombre de la pista:
+                    pista=embellecerTituloPista(pista);
+                    
                     // Se crea un objeto de la clase "Pista", con su código y el nombre
                     // y se añade a la lista de pistas:
                     PistaReservable pr = new PistaReservable(codigoPista, pista);
                     listaPistasReservables.add(pr);
                 }
-            }
+                
+                // Las ordenamos según título de la pista:
+                Collections.sort(listaPistasReservables,new Comparator<PistaReservable>() {
+
+                    @Override
+                    public int compare(PistaReservable o1, PistaReservable o2) {
+                       String nombre1="",nombre2="";
+                       if(o1!=null){
+                           nombre1=o1.getTitulo();
+                       } else {
+                           nombre1="1";                           
+                       }
+                       
+                       if(o2!=null){
+                           nombre2=o2.getTitulo();
+                       } else {
+                           nombre2="2";                           
+                       }
+                       
+                       return nombre2.compareTo(nombre1);
+                    }
+                });
+
+           }
 
         } catch (IOException ex) {
             Logger.getLogger(Reservas.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    /**
+     * Embellece el formato del nombre de la pista pasada por argumento. Por ejemplo:
+     * <i>"PC CAR - PABELLON (60min)"</i> &gt; <i>"C. CARTUJA - PABELLON (60min)"</i>.
+     * Ojo! Si añaden más pistas, es necesario modificarlo.
+     * @param pista String con el nombre de la pista.
+     * @return String con el formato agradable para un humano.
+     */
+    private String embellecerTituloPista(String pista) {
+       String titulo=pista;
+       String campus="";
+        String[] tokens = titulo.split("-");
+        
+        // Cambiamos el código principal a su cadena completa.
+        if(tokens[0].contains(STRING_CAM_FUENTENUEVA_ABREV)){
+            campus=STRING_CAM_FUENTENUEVA;
+        } else if(tokens[0].contains(STRING_CAM_CARTUJA_ABREV)){
+            campus=STRING_CAM_CARTUJA;
+        }
+        
+        titulo=campus+" - "+tokens[1].trim();
+       
+       return titulo;
     }
 }

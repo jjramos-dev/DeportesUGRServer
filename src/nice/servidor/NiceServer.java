@@ -76,6 +76,7 @@ public class NiceServer extends Application {
     private static ConfiguracionServidorNice configuracion;
     private static HebraPlanificacion hp;
 
+    private static boolean debug_extraer_info_torneos=true;
     
     /**
      * 
@@ -167,7 +168,10 @@ public class NiceServer extends Application {
                 try {
 
                     // Se extrae la información de qué torneos se han definido en la web del CAD:
-                    torneos_.consultarWeb();
+        
+                    if(debug_extraer_info_torneos){
+                        torneos_.consultarWeb();
+                    }
                     
                     // Hacemos una copia de la base de datos:
                     fout = new FileOutputStream("torneos.serial");

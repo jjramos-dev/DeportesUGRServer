@@ -120,7 +120,8 @@ public class ListaPistasReservablesFechas {
             //////////////////////////////////////////////
             Document doc = Jsoup.parse(respuesta);
 
-            Elements tabla_ = doc.select(".borde_estadisticas");
+            Elements tabla_ = doc.select(".borde_estadisticas > tbody");
+            
             tabla = "<head>"
                     + "<style>" + "td.celdaOcupada {"
                     + "background-color: #888888;" + // fondo de la tabla
@@ -131,11 +132,20 @@ public class ListaPistasReservablesFechas {
                     + "font-weight: bold;"
                     + "padding: 1px 6px;" + // 3px 6px
                     "}"
+                    + "a {color: #000000; text-decoration: none;}" // Enlaces sin subrayado.
+                    +"table { border-collapse: collapse; }" // Sólo una línea de borde
+                    +"table,td,th { border: 1px solid black;}" // con línea negra
+                    + ".celdaform1 {background: grey; color: #FFFFFF;}" 
                     + "</style>"
-                    + "</head><table class=\"borde_estadisticas\" width=\"70%\" border=\"1\">" + tabla_.html() + "</table>";
+                    + "</head>"
+                    
+                    + "<table class=\"borde_estadisticas\" width=\"70%\" border=\"1\">" + 
+                    tabla_.html() + 
+                    "</table>";
 
             tabla = tabla.replaceAll("Ocupaci\uFFFDn", "Ocupaci&oacute;n");
             tabla = tabla.replaceAll("el d\uFFFDa", "el d&iacute;a");
+            
             System.out.println(tabla);
 
             // Comprobamos si es día incorrecto:
