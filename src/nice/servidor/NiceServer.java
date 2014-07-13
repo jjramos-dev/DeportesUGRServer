@@ -80,7 +80,7 @@ public class NiceServer extends Application {
     private static ConfiguracionServidorNice configuracion;
     private static HebraPlanificacion hp;
 
-    private static boolean debug_extraer_info_torneos=false;
+    private static boolean debug_extraer_info_torneos=true;
     
     /**
      * 
