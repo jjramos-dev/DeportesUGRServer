@@ -16,12 +16,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package nice.cliente;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -43,60 +37,67 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 /**
+ * Ejemplo de cliente para consultas de una noticia concreta.
  *
  * @author jjramos
  */
 public class ClienteNoticia {
 
-    String baseURL="http://localhost:8081";
-    
-    ClienteNoticia(){
+    // URL del servidor
+    String baseURL = "http://localhost:8081";
+
+     /**
+      * Constructor del cliente. Ejecuta el procedimiento para solicitar e interpretar la información sobre una noticia.
+     */
+    ClienteNoticia() {
         try {
             // Ejemplo: del enlace a una noticia, extrae sus elementos y hace la llamda:
-            String enlaceNoticia="http://cad.ugr.es/pages/tablon/*/competiciones/i-circuito-spartan-triatlon-de-granada-2";
+            String enlaceNoticia = "http://cad.ugr.es/pages/tablon/*/competiciones/i-circuito-spartan-triatlon-de-granada-2";
 
-            
             // Obtenemos el tablón y el identificador de la noticia:
             String[] tokens = enlaceNoticia.split("/");
-            String tablon=tokens[tokens.length-2];
-            String noticiaId=tokens[tokens.length-1];
-            
-            
+            String tablon = tokens[tokens.length - 2];
+            String noticiaId = tokens[tokens.length - 1];
+
             String respuesta = "";
             // URL del servicio Restlet
-            String url = baseURL + "/noticias/"+noticiaId+"/tablones/"+tablon;
-            
+            String url = baseURL + "/noticias/" + noticiaId + "/tablones/" + tablon;
+
             // Leemos y almacenamos la respuesta:
             respuesta = leerURL(url);
-          
+
             // Interpretamos la respuesta JSON:
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            
+
             // Ejemplo para recibir una noticia:
-            Noticia noticia= mapper.readValue(respuesta, new TypeReference<Noticia>() {
+            Noticia noticia = mapper.readValue(respuesta, new TypeReference<Noticia>() {
             });
-            
-            
+
             // Lo mostramos:
-            System.out.println("Título: "+noticia.getTitulo());
-            System.out.println("Imagen: "+noticia.getImagenURL());
-            System.out.println("Noticia: "+noticia.getTextoHtml());
-            System.out.println("Enlace Original: "+noticia.getUrl());
-            
-            
-            
+            System.out.println("Título: " + noticia.getTitulo());
+            System.out.println("Imagen: " + noticia.getImagenURL());
+            System.out.println("Noticia: " + noticia.getTextoHtml());
+            System.out.println("Enlace Original: " + noticia.getUrl());
+
         } catch (IOException ex) {
             Logger.getLogger(ClienteNoticia.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-   private String leerURL(String url) {
+
+     /**
+     * Método que devuelve el texto plano obtenido tras solictar una URL. En
+     * próximas versiones, modificar por una librería más popular.
+     *
+     * @param url URL de la que se lee el fichero de texto plano.
+     * @return Texto plano devuelto por el servidor.
+     */
+    private String leerURL(String url) {
         String respuesta = "";
         try {
             // Hacemos una petici�n HTTP GET... Esto s�lo sirve para cosultar! de momento no modificamos nada:
             URL servicio = new URL(url);
-            URLConnection conexion = servicio.openConnection();        
+            URLConnection conexion = servicio.openConnection();
             BufferedReader in = new BufferedReader(new InputStreamReader(
                     conexion.getInputStream()));
 
@@ -118,7 +119,10 @@ public class ClienteNoticia {
         return respuesta;
     }
 
-   
+     /**
+     * Lanzador del ejemplo. 
+     * @param args No se utiliza ningún parámetro.
+     */
     public static void main(String[] args) {
         new ClienteNoticia();
     }

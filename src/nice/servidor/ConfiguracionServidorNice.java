@@ -29,7 +29,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * Clase que permite leer el fichero de configuración del servidor, y almacena los parámetros de configuración
+ * como pares de parámetro y valor.
+ * El fichero debe tener como formato:
+ * - por cada línea, se puede indicar un parámetro y su valor, mediante el signo "=": ej: puerto = 8080
+ * - Se pueden añadir comentarios, simplemente comenzando la línea con un punto y coma (";")
+ * 
  * @author jjramos
  */
 class ConfiguracionServidorNice {
@@ -42,12 +47,17 @@ class ConfiguracionServidorNice {
     String rutaFichero;
     private Map<String,String> valores;
 
+    /**
+     * Constructor al que se le pasa la ruta del fichero del que leer la configuración.
+     * @param rutaFichero Ruta del fichero de configuración.
+     */
     public ConfiguracionServidorNice(String rutaFichero) {
         this.rutaFichero=rutaFichero;
         
         valores=new HashMap<String,String>();
         
         try {
+            // Se lee del fichero línea a línea
             BufferedReader inputStream = new BufferedReader(new FileReader(rutaFichero));
             String linea=null;
             
@@ -55,6 +65,7 @@ class ConfiguracionServidorNice {
                 // Leemos una línea
                 linea=inputStream.readLine();
                 if(linea!=null){
+                    // Se procesa la línea para almacenar el nombre de cada parámetro y su valor.
                     error=procesarLinea(linea);
                 }
             } while(linea!=null&&error==0);
@@ -66,10 +77,16 @@ class ConfiguracionServidorNice {
         }
     }
 
+    /**
+     * Método para procesar cada línea, de forma que se pueda obtener el nombre de la variable y su valor, separados por "=",
+     * o un comentario, si la linea comienza por ";". ¡Ojo! la sintaxis debe ser muy estricta. 
+     * @param linea String que representa una línea del fichero de configuración.
+     * @return 
+     */
     private int  procesarLinea(String linea) {
         int error=0;
         
-        // Eliminamos espacios al principio.
+        // Eliminamos espacios al principio y final.
         linea=linea.trim();
         
         // Miramos si es un comentario:
@@ -79,6 +96,7 @@ class ConfiguracionServidorNice {
             // Miramos si es una variable con valor:
             String[] variable = linea.split("=");
             
+            // Si es una variable con su asignación:
             if(variable.length==2){
                 error=actualizarValor(variable[0].trim(),variable[1].trim());
             }        
@@ -87,6 +105,12 @@ class ConfiguracionServidorNice {
         return error;
     }
 
+    /**
+     * Almacena la pareja <code>variable</code> y su <code>valor</code> correspondiente
+     * @param variable Nombre del parámetro a almacenar. 
+     * @param valor Valor del parámetro.
+     * @return 
+     */
     private int actualizarValor(String variable, String valor) {
         int error=0;
         
@@ -95,18 +119,34 @@ class ConfiguracionServidorNice {
         return error;
     }
 
+    /**
+     * 
+     * @return 
+     */
     String getId() {
         return valores.get("joker-id");
     }
 
+    /**
+     * 
+     * @return 
+     */
     String getCadId() {
         return valores.get("joker-cad-id");
     }
 
+    /**
+     * 
+     * @return 
+     */
     int getError() {
         return error;
     }
 
+    /**
+     * Devuelve el puerto donde escuchará el servidor, configurado en el fichero, u <code>8080</code> por defecto.
+     * @return Puerto configurado.
+     */
     int getPuerto() {
         int puerto=8080;
         
@@ -138,6 +178,4 @@ class ConfiguracionServidorNice {
         
         return periodEnMinutos;
     }
-    
-    
 }

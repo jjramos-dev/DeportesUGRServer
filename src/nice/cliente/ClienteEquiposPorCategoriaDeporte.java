@@ -16,12 +16,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package nice.cliente;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -42,30 +36,36 @@ import nice.comun.Equipo;
 import nice.comun.Noticia;
 
 /**
+ * Ejemplo de cliente para consultar los equipos existentes para un torneo y
+ * deporte determinados.
  *
  * @author jjramos
  */
 public class ClienteEquiposPorCategoriaDeporte {
 
-    String baseURL="http://localhost:8081";
+    // URL del servidor
 
+    String baseURL = "http://localhost:8081";
+
+    // Constructor del cliente. Ejecuta el procedimiento para solicitar e interpretar la información sobre los equipos.
     private ClienteEquiposPorCategoriaDeporte(String trofeoId, String deporteId) {
-            
-            String respuesta = "";
-            // URL del servicio Restlet
-            String url = baseURL + "/categorias/"+trofeoId+"/deportes/"+deporteId+"/equipos";
-            
-            // Leemos y almacenamos la respuesta:
-            respuesta = leerURL(url);
-          
-            // Interpretamos la respuesta JSON:
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            
+
+        String respuesta = "";
+        // URL del servicio Restlet
+        String url = baseURL + "/categorias/" + trofeoId + "/deportes/" + deporteId + "/equipos";
+
+        // Leemos y almacenamos la respuesta:
+        respuesta = leerURL(url);
+
+        // Interpretamos la respuesta JSON:
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
         try {
             // Miramos los equipos:
-            List<Equipo> listaEquipos= mapper.readValue(respuesta, new TypeReference<List<Equipo>>() {});
-            
+            List<Equipo> listaEquipos = mapper.readValue(respuesta, new TypeReference<List<Equipo>>() {
+            });
+
             // Los ordenamos:
             Collections.sort(listaEquipos, new Comparator<Equipo>() {
 
@@ -75,25 +75,30 @@ public class ClienteEquiposPorCategoriaDeporte {
                     return o2.getNombre().compareTo(o1.getNombre());
                 }
             });
-            
-            for(Equipo equipo:listaEquipos){
-                System.out.println(" "+equipo.getNombre()+" -> "+equipo.getUrl());
+
+            for (Equipo equipo : listaEquipos) {
+                System.out.println(" " + equipo.getNombre() + " -> " + equipo.getUrl());
             }
-            
-            
+
         } catch (IOException ex) {
             Logger.getLogger(ClienteEquiposPorCategoriaDeporte.class.getName()).log(Level.SEVERE, null, ex);
         }
-   
-        
+
     }
-    
+
+     /**
+     * Método que devuelve el texto plano obtenido tras solictar una URL. En
+     * próximas versiones, modificar por una librería más popular.
+     *
+     * @param url URL de la que se lee el fichero de texto plano.
+     * @return TExto plano devuelto por el servidor.
+     */
     private String leerURL(String url) {
         String respuesta = "";
         try {
             // Hacemos una petici�n HTTP GET... Esto s�lo sirve para cosultar! de momento no modificamos nada:
             URL servicio = new URL(url);
-            URLConnection conexion = servicio.openConnection();        
+            URLConnection conexion = servicio.openConnection();
             BufferedReader in = new BufferedReader(new InputStreamReader(
                     conexion.getInputStream()));
 
@@ -115,10 +120,11 @@ public class ClienteEquiposPorCategoriaDeporte {
         return respuesta;
     }
 
-   
+    /**
+     * Lanzador del ejemplo. 
+     * @param args No se utiliza ningún parámetro.
+     */
     public static void main(String[] args) {
-        new ClienteEquiposPorCategoriaDeporte("trofeo-rector-1a-division-2013","futbol-11");
+        new ClienteEquiposPorCategoriaDeporte("trofeo-rector-1a-division-2013", "futbol-11");
     }
-
-    
 }

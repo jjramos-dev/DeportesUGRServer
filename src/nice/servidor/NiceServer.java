@@ -80,15 +80,16 @@ public class NiceServer extends Application {
     private static ConfiguracionServidorNice configuracion;
     private static HebraPlanificacion hp;
 
+    // Flag para omitir la extracció nde toda la información sobre torneos:
     private static boolean debug_extraer_info_torneos=true;
     
     /**
-     * 
-     * @param string 
+     * Lanza la consulta de pistas disponibles para reserva.
+     * @param baseURL_ Representa la URL base para buscar las pistas reservables.
      * @return Lista de pistas reservables que se pueden elegir
      */
-    private static List<PistaReservable> incializarBaseDeDatosPistasReservables(String string) {
-        ListaPistasReservables pr = new ListaPistasReservables(string);
+    private static List<PistaReservable> incializarBaseDeDatosPistasReservables(String baseURL_) {
+        ListaPistasReservables pr = new ListaPistasReservables(baseURL_);
 
         // Ejecuta la búsqueda de información en la web de las páginas de reserva, y obtiene la lista
         // de pistas definidas en la web:
@@ -275,6 +276,11 @@ public class NiceServer extends Application {
     }
 
     
+    /**
+     * Lanza una hebra para refrescar las bases de datos del servidor cada <code>period</code> minutos. 
+     * Este periodo se puede indicar en el fichero de configuración del servidor.
+     * @param period Minutos entre refrescos.
+     */
     private static void planificarRefrescoBaseDeDatos(long period) {
      
         HebraPlanificacion hebraPlanificacion = new HebraPlanificacion(period);
@@ -282,13 +288,24 @@ public class NiceServer extends Application {
     }
 
 
+    /**
+     * Subclase que implementa la hebra para refrescar las bases de datos.
+     */
     static public class HebraPlanificacion extends Thread{
         long period=0;
         
+        /**
+         * Constructor de la hebra, que toma como parámetro el periodo entre refrescos.
+         * @param periodoEnMinutos Periodo entre refrescos expresados en minutos.
+         */
         public HebraPlanificacion(long periodoEnMinutos) {
             this.period=periodoEnMinutos;
         }
 
+        /**
+         * Método que se ejecuta en la hebra.Se duerme <code>period</code> 
+         * minutos entre inicialización e inicialización de la base de adtos.
+         */
         @Override
         public void run() {
             super.run(); //To change body of generated methods, choose Tools | Templates.
@@ -303,14 +320,13 @@ public class NiceServer extends Application {
                 } catch (InterruptedException ex) {
                     Logger.getLogger(NiceServer.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            } while(true);
-            
+            } while(true);      
         }
     }
     
     /**
      * Inicializa los recursos accesibles con el RESTlet: 
-     * @return 
+     * @return Devuelve el encaminador RESTlet que usará el servidor.
      */
     public Restlet createInboundRoot() {
         
@@ -410,10 +426,9 @@ public class NiceServer extends Application {
     }
     
     /**
-     * 
-     * 
-     * @param anio
-     * @return 
+     * Método para consultar la lista de torneos definidos para el año <code>anio</code>.
+     * @param anio Año de los torneos a consultar, con formato: "AAAA" 
+     * @return Devuelve la lista de los torneos del año seleccionado. Si no hay ninguno, devueve <code>null</code>
      */
     List<DatosCategoria> getListaCategorias(String anio) {
         List<DatosCategoria> categorias = new ArrayList<DatosCategoria>();
@@ -584,6 +599,12 @@ public class NiceServer extends Application {
       return noticia;
     }
 
+    /**
+     * Devuelve la lista de inscritos en un torneo <code>categoriaId</code> y un deporte <code>deporteId</code>
+     * @param categoriaId Código del torneo.
+     * @param deporteId Código del deporte.
+     * @return Lista de equipos.
+     */
     List<Equipo> getEquipos(String categoriaId, String deporteId) {
         
         List<Equipo> listaEquipos=null;
@@ -593,8 +614,7 @@ public class NiceServer extends Application {
         Categoria categoria = torneos.getCategoria(categoriaId);
         String tituloCategoria = categoria.getTitulo();
         
-        // Buscamos la información del deporte:
-        
+        // Buscamos la información del deporte (¡mejorar!):
         List<Deporte> listaDeportes = categoria.getListaDeportes();
         Deporte deporte=null;
         for(int i=0;deporte==null&&i<listaDeportes.size();i++){
@@ -608,7 +628,7 @@ public class NiceServer extends Application {
             tituloDeporte=deporte.getTitulo();
         }
         
-        
+        // Se busca, para cada partido del deporte y torneo indicado, en cada fase, los equipos existentes:
         List<Fase> listaclasificaciones = categoria.getFases(deporteId);
 
                 for (Fase fase : listaclasificaciones) {
@@ -637,7 +657,7 @@ public class NiceServer extends Application {
                 listaEquipos.add(datosEquipo);
             }
 
-            // Ordenamos la lista...
+            // Ordenamos la lista de equipos...
             Collections.sort(listaEquipos, new Comparator<Equipo>() {
 
                 @Override

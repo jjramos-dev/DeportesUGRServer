@@ -38,14 +38,17 @@ import nice.comun.Fase;
 import nice.comun.Partido;
 import nice.comun.Ronda;
 
-
-/*
+/**
+ * Ejemplo de cliente para consultas de torneos.
+ *
  * @author jjramos
  */
 public class ClienteTorneos {
 
+    // URL del servidor
     private String baseUrl = "http://localhost:8080";
 
+    // Constructor del cliente. Ejecuta el procedimiento para solicitar e interpretar la información sobre torneos.
     public ClienteTorneos() {
 
         // Consulto las categor�as del a�o 2013:
@@ -87,10 +90,21 @@ public class ClienteTorneos {
         // 
     }
 
+    /**
+     * Lanza el cliente de consulta de torneos.
+     *
+     * @param args No se utilizan.
+     */
     public static void main(String[] args) {
         new ClienteTorneos();
     }
 
+    /**
+     * Método que realiza la consulta al servidor.
+     *
+     * @param anio Año que se consulta, en formato: "AAAA"
+     * @return Devuelve una lista de torneos para el año solicitado.
+     */
     private List<DatosCategoria> obtenerTorneos(String anio) {
         List<DatosCategoria> listaCategorias = null;
 
@@ -119,6 +133,12 @@ public class ClienteTorneos {
         return listaCategorias;
     }
 
+    /**
+     * Consulta los deportes definidos para un torneo dado, idenficado por su <code>id>/code>.
+     *
+     * @param id Código del torneo.
+     * @return
+     */
     private List<Deporte> obtenerDeportes(String id) {
         List<Deporte> listaDeportes = null;
 
@@ -148,6 +168,13 @@ public class ClienteTorneos {
 
     }
 
+    /**
+     * Método que devuelve el texto plano obtenido tras solictar una URL. En
+     * próximas versiones, modificar por una librería más popular.
+     *
+     * @param url URL de la que se lee el fichero de texto plano.
+     * @return TExto plano devuelto por el servidor.
+     */
     private String leerURL(String url) {
         String respuesta = "";
         try {
@@ -175,6 +202,13 @@ public class ClienteTorneos {
         return respuesta;
     }
 
+    /**
+     * Devuelve las fases definidas en una competición.
+     *
+     * @param categoriaId Código del torneo.
+     * @param deporteId Código del deporte.
+     * @return Lista de fases.
+     */
     private List<Fase> obtenerFases(String categoriaId, String deporteId) {
         List<Fase> listaFases = null;
 
@@ -194,14 +228,12 @@ public class ClienteTorneos {
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
             // Ejemplo para recibir una lista de objetos:
-            listaFases = mapper.readValue(respuesta, new TypeReference<List<Fase>>(){});
+            listaFases = mapper.readValue(respuesta, new TypeReference<List<Fase>>() {
+            });
 
         } catch (IOException ex) {
             Logger.getLogger(ClienteTorneos.class.getName()).log(Level.SEVERE, null, ex);
         }
         return listaFases;
-
     }
-
 }
-

@@ -29,16 +29,16 @@ public class PistaReservable {
     private String titulo = null;
 
     /**
-     * 
+     * Constructor vacío. Necesario para Jackson.
      */
     PistaReservable() {
 
     }
 
     /**
-     * 
-     * @param codigoPista
-     * @param pista 
+     * Constructor con los argumentos con los que inicializar el objeto.
+     * @param codigoPista Código de la pista reservable.
+     * @param pista Nombre de la pista reservable.
      */
     PistaReservable(String codigoPista, String pista) {
         this.codigo = codigoPista;
@@ -46,31 +46,35 @@ public class PistaReservable {
     }
 
     /**
-     * 
-     * @return 
+     * Codigo getter
+     * @return Devuelve el código de la pista. 
      */
     public String getCodigo() {
         return codigo;
     }
+
+    /**
+     * Titulo getter
+     * @return Devuelve el nombre de la pista.
+     */
 
     public String getTitulo() {
         return titulo;
     }
 
     /**
-     * 
-     * @param codigo 
+     * Codigo setter
+     * @param codigo Código de la pista reservable. 
      */
     public void setCodigo(String codigo) {
         this.codigo = codigo;
     }
 
     /**
-     * 
-     * @param titulo 
+     * Titulo setter
+     * @param titulo Título del a pista reservable.
      */
     public void setTitulo(String titulo) {
         this.titulo = titulo;
     }
-
 }

@@ -17,12 +17,6 @@
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-package nice.comun;
-
 /**
- *
- * @author jjramos
+ * Este paquete proporciona las clases comunes a todo el servidor, el modelo del servicio.
  */
-public class Campus {
-    
-}
