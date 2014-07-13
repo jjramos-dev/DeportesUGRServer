@@ -135,10 +135,11 @@ public class ListaPistasReservablesFechas {
                     + "a {color: #000000; text-decoration: none;}" // Enlaces sin subrayado.
                     +"table { border-collapse: collapse; }" // Sólo una línea de borde
                     +"table,td,th { border: 1px solid black;}" // con línea negra
-                    + ".celdaform1 {background: grey; color: #FFFFFF;}" 
+                    + ".celdaform1 {background: black; color: #FFFFFF;}" 
+                    + ".celdaSinEfecto {background: #D0D0D0; color: #000000;}"
                     + "</style>"
                     + "</head>"
-                    
+                    + "<h3>Consulta de ocupaci&oacute;n de las pistas</h3>"
                     + "<table class=\"borde_estadisticas\" width=\"70%\" border=\"1\">" + 
                     tabla_.html() + 
                     "</table>";

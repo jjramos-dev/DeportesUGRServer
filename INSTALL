@@ -1,0 +1,16 @@
+
+Requisitos de compilación
+=========================
+
+ Para poder compilar el servidor, es necesario descargar al directorio lib/ las siguientes bibliotecas y paquetes:
+ - De la biblioteca RESTlet (http://restlet.com/), la biblioteca básica y los conectores para HTTP, versión 2.2.1+ par aJava SE. Concretamente:
+    - org.apache.httpclient.jar  
+    - org.apache.httpcore.jar  
+    - org.restlet.jar
+ - De la biblioteca JSoup (http://jsoup.org/), la versión 1.7.3+. Concretamente:
+    - jsoup-1.7.3.jar
+ - De la biblioteca Jackson (http://jackson.codehaus.org/), la versión 2.2.3+ de "annotations", "core" y "databind". Concretamente:
+    - jackson-annotations-2.2.3.jar  
+    - jackson-core-2.2.3.jar  
+    - jackson-databind-2.2.3.jar 
+
