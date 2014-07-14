@@ -20,7 +20,7 @@
 package nice.comun;
 
 /**
- *
+ * Eliminar en próximas releases.
  * @author jjramos
  */
 public class Campus {

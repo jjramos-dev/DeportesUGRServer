@@ -29,9 +29,11 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 /**
- * Clase que almacena toda la información relativa a un torneo. Se identifica por un <code>id</code> único. Contiene una URL a la normativa del torneo,
- * el año al que pertenece, y los deportes y clasificaciones asociados.
- * 
+ * Clase que almacena toda la información relativa a un torneo. Se identifica
+ * por un <code>id</code> único. Contiene una URL a la normativa del torneo, el
+ * año al que pertenece, y los deportes y clasificaciones (partidos, calendarios
+ * y resultados) asociados.
+ *
  * @author jjramos
  */
 public class Categoria {
@@ -44,28 +46,30 @@ public class Categoria {
     private String id;
     private String anio;
 
+    /**
+     * Constructor de <code>Categoria</code> al que se le pasa como argumento la
+     * URL base de la web del CAD que contiene información sobre la misma.
+     *
+     * @param url URL de la web del CAD que describe el torneo.
+     */
     public Categoria(String url) {
         this.url = url;
         listaDeportes = new ArrayList<Deporte>();
         listaClasificaciones = new ArrayList<Clasificaciones>();
     }
 
+    /**
+     * Extrae de la web del CAD la información sobre los deportes definidos para
+     * el torneo concreto, extrae la URL de la normativa del torneo, y por cada
+     * deporte, lanza las arañas para extraer la información de los partidos y
+     * los calendarios correspondientes (<code>Clasificaciones</code>).
+     */
     public void consultarWeb() {
         try {
 
             Document doc = Jsoup.connect(url).get();
             Elements deportes = doc.select(".deporte > .accion > a");
 
-            // Como identificador le ponemos la última parte de la url:
-//            String[] titulo_ = url.split("/");
-//            System.out.println("Categoría > "+url);
-//            if(titulo_.length>1){
-//               //// titulo=titulo_[titulo_.length-1];
-//                id=titulo_[titulo_.length-1];
-//            } else {
-//                //// titulo="";
-//                id="";
-//            }
             // Descargamos la URL de la normativa:
             Elements descarga = doc.select(".descarga > a");
             if (descarga != null && descarga.first() != null) {
@@ -82,13 +86,17 @@ public class Categoria {
                 // Un deporte tiene su nombre, y el enlace donde encontrar más información del recurso:
                 Deporte deporte = new Deporte(deporteE.text(), deporteE.attr("abs:href"));
 
+                // Añadimos el deporte a la lista de deportes definidos para este torneo.
                 listaDeportes.add(deporte);
 
+                // Creamos un objeto clasificación para este deporte, y le indicamos que 
+                // extraiga de la web la información de los partidos.
                 Clasificaciones clasificaciones = new Clasificaciones(deporte.getUrl() + "/calendario");
                 clasificaciones.consultarWeb();
 
                 clasificaciones.setDeporte(deporte);
 
+                // Añadimos esta clasificación a la lista de clasificaciones.
                 listaClasificaciones.add(clasificaciones);
             }
 
@@ -98,14 +106,28 @@ public class Categoria {
 
     }
 
+    /**
+     * Getter de <code>id</code> (identificador del torneo).
+     *
+     * @return <code>id</code>
+     */
     public String getId() {
         return id;
     }
 
+    /**
+     * Setter de <code>id</code> (identificador del torneo).
+     *
+     * @param id
+     */
     public void setId(String id) {
         this.id = id;
     }
 
+    /**
+     * Método de ayuda para mostrar todo el contenido de un objeto
+     * <code>Categoria</code>.
+     */
     void mostrar() {
 
         System.out.println("Normativa: " + this.urlNormativa);
@@ -143,42 +165,98 @@ public class Categoria {
         }
     }
 
+    /**
+     * Getter de la <code>url</code> base (la dirección web de la información
+     * del torneo en el CAD).
+     *
+     * @return <code>url</code>
+     */
     public String getUrl() {
         return url;
     }
 
+    /**
+     * Setter de la <code>url</code> base (la dirección web de la información
+     * del torneo en el CAD).
+     *
+     * @param url Url de la web del torneo.
+     */
     public void setUrl(String url) {
         this.url = url;
     }
 
+    /**
+     * Getter de la URL del documento de la normativa del torneo.
+     *
+     * @return URL de la normativa (generalmente de un fichero PDF).
+     */
     public String getUrlNormativa() {
         return urlNormativa;
     }
 
+    /**
+     * Setter de la URL del documento de la normativa del torneo.
+     *
+     * @param urlNormativa
+     */
     public void setUrlNormativa(String urlNormativa) {
         this.urlNormativa = urlNormativa;
     }
 
+    /**
+     * Getter de la lista de deportes definidas para el torneo.
+     *
+     * @return Lista de deportes definidas para el torneo.
+     */
     public List<Deporte> getListaDeportes() {
         return listaDeportes;
     }
 
+    /**
+     * Setter de la lista de deportes definidas para el torneo.
+     *
+     * @param listaDeportes Lista de deportes definidas para el torneo.
+     */
     public void setListaDeportes(List<Deporte> listaDeportes) {
         this.listaDeportes = listaDeportes;
     }
 
+    /**
+     * Getter de la lista de clasificicaciones (calendarios de partidos y
+     * resultados)
+     *
+     * @return Lista de clasificaciones.
+     */
     public List<Clasificaciones> getListaClasificaciones() {
         return listaClasificaciones;
     }
 
+    /**
+     * Setter de la lista de clasificicaciones (calendarios de partidos y
+     * resultados)
+     *
+     * @param listaClasificaciones Lista de clasificaciones.
+     */
     public void setListaClasificaciones(List<Clasificaciones> listaClasificaciones) {
         this.listaClasificaciones = listaClasificaciones;
     }
 
+    /**
+     * Getter del nombre del torneo.
+     *
+     * @return Nombre del torneo.
+     */
     public String getTitulo() {
         return titulo;
     }
 
+    /**
+     * Getter de las fases definidas en las clasificaciones del torneo, para un
+     * deporte dado, identificado por su <code>deporteId</code>.
+     *
+     * @param deporteId Identificador del deporte a consultar.
+     * @return Lista de fases definidas para el deporte y torneo seleccionados.
+     */
     public List<Fase> getFases(String deporteId) {
 
         List<Fase> fases = null;
@@ -195,14 +273,31 @@ public class Categoria {
         return fases;
     }
 
+    /**
+     * Setter del nombre del torneo
+     *
+     * @param text Nombre del torneo.
+     */
     void setTitulo(String text) {
         titulo = text;
     }
 
+    /**
+     * Setter del año del torneo.
+     *
+     * @param anio Año en que comienza el curso del torneo, en formato "AAAA".
+     * Por ej,: para un torneo en el curso 13/14, <code>anio="2013"</code>.
+     */
     void setAnio(String anio) {
         this.anio = anio;
     }
 
+    /**
+     * Getter del año del torneo.
+     *
+     * @return Año en que comienza el curso del torneo, en formato "AAAA". Por
+     * ej,: para un torneo en el curso 13/14, <code>anio="2013"</code>.
+     */
     public String getAnio() {
         return anio;
     }

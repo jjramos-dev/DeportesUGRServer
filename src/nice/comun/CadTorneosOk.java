@@ -16,12 +16,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 
 package nice.comun;
 
@@ -29,7 +23,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- *
+ * Ejemplo de cliente que solicita información para un torneo concreto. Eliminar en próximas releases.
  * @author jjramos
  */
 public class CadTorneosOk {
