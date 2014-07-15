@@ -16,12 +16,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package nice.servidor;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -36,45 +30,53 @@ import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;
 
 /**
+ * Clase requerida por RESTlet para servir los recursos de la clase
+ * <code>Deporte</code>
  *
  * @author jjramos
  */
-public class RecursoDeportes extends ServerResource{
-     
-  NiceServer servicioRestTorneos=null;
+public class RecursoDeportes extends ServerResource {
+
+    NiceServer servicioRestTorneos = null;
     private String categoria;
     private ObjectMapper mapper;
     List<Deporte> deportes;
-    
-  public void doInit() {
+
+    /**
+     * Inicialización del recurso. Requiere inicializar los objetos que se
+     * utilizarán en la serialización, y recoge los parámetros introducidos en
+     * las URL del recurso.
+     */
+    public void doInit() {
         System.out.println("Hola Deportes!");
-      mapper=new ObjectMapper(); 
-      // Para que no falle aunque no tenga un constructtor vacío, ni getter y setters públicos:
-      mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        servicioRestTorneos=(NiceServer) getApplication();
-        
+        mapper = new ObjectMapper();
+        // Para que no falle aunque no tenga un constructtor vacío, ni getter y setters públicos:
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        servicioRestTorneos = (NiceServer) getApplication();
+
         // Parámetro obtenido de la URL
         this.categoria = getAttribute("categoria");
-        
-        deportes=servicioRestTorneos.getDeportes(categoria);
+
+        deportes = servicioRestTorneos.getDeportes(categoria);
     }
-    
-    
+
+    /**
+     * Método que devuelve el recurso serializado con representación JSON.
+     *
+     * @return String con la representación en JSON del recurso.
+     */
     @Get("json")
     public String devolver() {
-        String serializado=null;
+        String serializado = null;
         System.out.println("Devolver!");
         try {
-        
-            serializado=mapper.writeValueAsString(deportes);
-      
-        
+
+            serializado = mapper.writeValueAsString(deportes);
+
         } catch (JsonProcessingException ex) {
-          Logger.getLogger(RecursoDeportes.class.getName()).log(Level.SEVERE, null, ex);
-      }
-            
-      
-        
+            Logger.getLogger(RecursoDeportes.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
         return serializado;
     }
 }

@@ -16,30 +16,34 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-
 package nice.comun;
 
 /**
+ * Clase que aglutina las funciones básicas relacionadas con la generación de
+ * URL, almacén de URL, etc. para no tener que utilizar literales en el resto de
+ * las clases. Así se consigue tener clases que no dependan del cambio de
+ * ubicación de recursos.
  *
  * @author jjramos
  */
 public class Global {
 
-    public static final String baseUrlListaPistasReservables="http://oficinavirtual.ugr.es/CarneUniversitario/TarjetasDeportes.jsp?textoXML=<xml><numero_PIU></numero_PIU><solicitud><dni>janderclander</dni><nia></nia><tarjeta_deportiva>1</tarjeta_deportiva><pago_viable>0</pago_viable><saldo_monedero>0</saldo_monedero></solicitud></xml>#";
-    public static final String baseUrlTorneos="http://cad.ugr.es/static/CADManagement";
-    public static String baseUrlDatosContacto="http://cad.ugr.es/pages/administracion";
-    
+    public static final String baseUrlListaPistasReservables = "http://oficinavirtual.ugr.es/CarneUniversitario/TarjetasDeportes.jsp?textoXML=<xml><numero_PIU></numero_PIU><solicitud><dni>janderclander</dni><nia></nia><tarjeta_deportiva>1</tarjeta_deportiva><pago_viable>0</pago_viable><saldo_monedero>0</saldo_monedero></solicitud></xml>#";
+    public static final String baseUrlTorneos = "http://cad.ugr.es/static/CADManagement";
+    public static String baseUrlDatosContacto = "http://cad.ugr.es/pages/administracion";
+
     /**
-     * Devuelve la URL para acceder a la página de listado de pistas, 
-     * dada una acreditación general.
+     * Devuelve la URL para acceder a la página de listado de pistas, dada una
+     * acreditación general.
+     *
      * @param dni DNI admitido en el sistema.
      * @param cadId Identificador de tarjeta de CAD.
      * @return Devuelve la URL de la web de reservas.
      */
     public static String getBaseUrlListaPistasReservables(String dni, String cadId) {
-        String url=baseUrlListaPistasReservables;
-        url=url.replaceAll("janderclander", dni);
+        String url = baseUrlListaPistasReservables;
+        url = url.replaceAll("janderclander", dni);
         return url;
     }
-    
+
 }

@@ -16,22 +16,20 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package nice.comun;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Clase que mantiene la información de las distintas fases de un torneo. INcluye infromación de las rondas 
+ * definidas para cada fase. Cada ronda tendrá la lista de partidos.
  * @author jjramos
  */
 public class Fase {
+
     private String titulo;
-    //private List<Partido> partidos;
     private List<Ronda> rondas;
 
     

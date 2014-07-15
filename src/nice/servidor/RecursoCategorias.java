@@ -29,43 +29,56 @@ import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;
 
 /**
+ * Clase requerida por RESTlet para servir los recursos de la clase
+ * <code>Categoria</code>
  *
  * @author aulas
  */
-public class RecursoCategorias extends ServerResource{
+public class RecursoCategorias extends ServerResource {
+
     private ObjectMapper mapper;
     private NiceServer servicioRestTorneos;
     private String anio;
     List<DatosCategoria> categorias;
-    
-      public void doInit() {
+
+    /**
+     * Inicialización del recurso. Requiere inicializar los objetos que se
+     * utilizarán en la serialización, y recoge los parámetros introducidos en
+     * las URL del recurso.
+     */
+    public void doInit() {
         System.out.println("Hola!");
-          mapper=new ObjectMapper(); 
-      // Para que no falle aunque no tenga un constructtor vacío, ni getter y setters públicos:
-      mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        servicioRestTorneos=(NiceServer) getApplication();
-        
+        mapper = new ObjectMapper();
+        // Para que no falle aunque no tenga un constructtor vacío, ni getter y setters públicos:
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        servicioRestTorneos = (NiceServer) getApplication();
+
         // Parámetro obtenido de la URL
         this.anio = getAttribute("anio");
-        
+
         //categorias=servicioRestTorneos.getCategorias(anio);
-categorias=servicioRestTorneos.getListaCategorias(anio);
+        categorias = servicioRestTorneos.getListaCategorias(anio);
 
-      }
+    }
 
-          @Get("json")
+    /**
+     * Método que devuelve el recurso serializado con representación JSON.
+     *
+     * @return String con la representación en JSON del recurso.
+     */
+    @Get("json")
     public String devolver() {
-            String serializado=null;
-        
+        String serializado = null;
+
         try {
-          
-            serializado=mapper.writeValueAsString(categorias);
-    
-          } catch (JsonProcessingException ex) {
+            // Serializa el objeto mediante Jackson.
+            serializado = mapper.writeValueAsString(categorias);
+
+        } catch (JsonProcessingException ex) {
             Logger.getLogger(RecursoCategorias.class.getName()).log(Level.SEVERE, null, ex);
         }
-          return serializado;
-        
+        return serializado;
+
     }
 
 }

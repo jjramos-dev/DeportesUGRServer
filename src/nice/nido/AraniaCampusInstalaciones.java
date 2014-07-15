@@ -16,12 +16,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package nice.nido;
 
 import java.util.ArrayList;
@@ -36,53 +30,62 @@ import org.jsoup.select.Elements;
 /**
  *
  * @author jjramos
- * 
- * Obtiene la lista de campus indicadas en la web del CAD, sección de "instalaciones".
- * Actualizado a 13/06/2014
+ *
+ * Obtiene la lista de campus indicadas en la web del CAD, sección de
+ * "instalaciones". Actualizado a 13/06/2014
  */
 public class AraniaCampusInstalaciones extends Arania {
-    static private String baseUrl="http://cad.ugr.es/pages/instalaciones_deport/instalaciones";
 
-    
+    static private String baseUrl = "http://cad.ugr.es/pages/instalaciones_deport/instalaciones";
+
+    /**
+     * Constructor con la URL base de la página web de instalaciones.
+     *
+     * @param baseUrl URL de la página de instalaciones.
+     */
     public AraniaCampusInstalaciones(String baseUrl) {
-        this.baseUrl=baseUrl;
+        this.baseUrl = baseUrl;
     }
-    
-    public List<Campus> explorar(){
-        List<Campus> listaCampus=new ArrayList();
-        
+
+    public List<Campus> explorar() {
+        List<Campus> listaCampus = new ArrayList();
+
         // Descargamos la web, y la almacenamos como DOM
-        Document doc=descargarPagina(baseUrl);
-        
+        Document doc = descargarPagina(baseUrl);
+
         // Buscamos la entrada en el menú que ponga: "li.mainmenu_itemname_instalaciones"
         Elements entradaInstalaciones = doc.select("li.mainmenu_itemname_instalaciones");
-        
+
         // Si la encontramos, miramos los enlaces, y nos 
         // quedamos con los que contengan "Campus":
-        if(entradaInstalaciones!=null){
-            Elements entradas=entradaInstalaciones.first().select("a");
-            
+        if (entradaInstalaciones != null) {
+            Elements entradas = entradaInstalaciones.first().select("a");
+
             // Por cada enlace...
-            for(Element entrada:entradas){
-                String enlace=entrada.attr("abs:href");
-                String texto=entrada.text();
-        
+            for (Element entrada : entradas) {
+                String enlace = entrada.attr("abs:href");
+                String texto = entrada.text();
+
                 // Si tiene la subcadena "ampus":
-                if(texto.contains("ampus")){
-                    AraniaInstalacion arania = new AraniaInstalacion(enlace,texto);
-                    
-                    System.out.println(enlace+" -> "+texto);
+                if (texto.contains("ampus")) {
+                    AraniaInstalacion arania = new AraniaInstalacion(enlace, texto);
+
+                    System.out.println(enlace + " -> " + texto);
                 }
             }
         }
         //System.out.println("---> "+e0.first().text());
-        
+
         List<Instalacion> listaInstalaciones = null;
-        
+
         return listaCampus;
-    }   
-    
-    
+    }
+
+    /**
+     * Método para lanzar desde línea de comandos la araña.
+     *
+     * @param args
+     */
     public static void main(String[] args) {
         AraniaCampusInstalaciones arania = new AraniaCampusInstalaciones(baseUrl);
         arania.explorar();

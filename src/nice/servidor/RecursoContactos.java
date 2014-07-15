@@ -30,6 +30,8 @@ import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;
 
 /**
+ * Clase requerida por RESTlet para servir los recursos de la clase
+ * <code>DatosContacto</code>
  *
  * @author jjramos
  */
@@ -39,6 +41,11 @@ public class RecursoContactos extends ServerResource {
     private NiceServer servicioRestTorneos;
     List<DatosContacto> contactos;
 
+    /**
+     * Inicialización del recurso. Requiere inicializar los objetos que se
+     * utilizarán en la serialización, y recoge los parámetros introducidos en
+     * las URL del recurso.
+     */
     public void doInit() {
 
         mapper = new ObjectMapper();
@@ -50,6 +57,11 @@ public class RecursoContactos extends ServerResource {
 
     }
 
+    /**
+     * Método que devuelve el recurso serializado con representación JSON.
+     *
+     * @return String con la representación en JSON del recurso.
+     */
     @Get("json")
     public String devolver() {
         String serializado = null;
