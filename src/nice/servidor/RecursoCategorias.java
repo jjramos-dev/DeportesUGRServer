@@ -21,6 +21,7 @@ package nice.servidor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import java.util.Calendar;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -55,6 +56,18 @@ public class RecursoCategorias extends ServerResource {
 
         // Parámetro obtenido de la URL
         this.anio = getAttribute("anio");
+        
+        // Ahora mismo, mejor que devuelvan las categorías del año actual: si estamos
+        // en septiembre, cambiamos de año.
+        Calendar now = Calendar.getInstance();
+        int anio_=now.get(Calendar.YEAR);
+        int mes=now.get(Calendar.MONTH);
+        if(mes>Calendar.SEPTEMBER){
+            
+        } else {
+            anio_=anio_-1;
+            anio=anio_+"";
+        }
 
         //categorias=servicioRestTorneos.getCategorias(anio);
         categorias = servicioRestTorneos.getListaCategorias(anio);
