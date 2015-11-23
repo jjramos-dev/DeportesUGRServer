@@ -68,6 +68,9 @@ public class RecursoCategorias extends ServerResource {
             anio_=anio_-1;
             anio=anio_+"";
         }
+        
+        // Siempre da el último año.... Era para subsanar el error de la app (que tenía fijo 2013)
+        anio=anio_+"";
 
         //categorias=servicioRestTorneos.getCategorias(anio);
         categorias = servicioRestTorneos.getListaCategorias(anio);
